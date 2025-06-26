@@ -125,9 +125,7 @@ let enforce_constraint src (q1,k,q2) (g,p,dom) =
      match src with
      | Static -> (g',p,dom)
      | Rigid ->
-        if (Quality.is_qconst q1 && Quality.is_qconst q2) ||
-             (Quality.is_qsprop q1 && not (Quality.is_qsprop q2)) ||
-               (Quality.is_qprop q1 && not (Quality.is_qprop q2))
+        if (Quality.is_qconst q1 && Quality.is_qconst q2)
         then raise (EliminationError IllegalConstraint)
         else (g', RigidPaths.add (q1,q2) @@ add_transitive_rigid_paths q1 q2 p,dom)
      | Internal ->
