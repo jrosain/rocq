@@ -1,0 +1,8 @@
+type nat =
+| O
+| S of nat
+
+(** val foo : nat -> nat **)
+
+let foo k =
+  k
