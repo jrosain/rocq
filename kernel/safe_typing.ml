@@ -179,7 +179,7 @@ struct
 
 end
 
-type global_sort_infos = { with_uip: bool }
+type global_sort_infos = { with_uip: bool; erased_at_extraction: bool }
 
 type compiled_library = {
   comp_name : DirPath.t;
@@ -627,10 +627,10 @@ let push_context_set ~strict cst senv =
 let current_modpath senv = senv.modpath
 let current_dirpath senv = Names.ModPath.dp (current_modpath senv)
 
-let has_global_infos infos = infos.with_uip
-let make_global_infos ~uip = { with_uip = uip }
+let has_global_infos infos = infos.with_uip || infos.erased_at_extraction
+let make_global_infos ~uip ~erased = { with_uip = uip; erased_at_extraction = erased }
 let global_infos_with_poly_err infos =
-  let acc = [("UIP", "uip", infos.with_uip)] in
+  let acc = [("UIP", "uip", infos.with_uip); ("Erasure", "erased", infos.erased_at_extraction)] in
   let acc = List.filter_map (fun (msg,attr,enabled) -> if enabled then Some (msg,attr) else None) acc in
   let names = Pp.pr_enum Pp.str (List.map fst acc) in
   let attrs = Pp.prlist_with_sep (fun () -> Pp.str", ") Pp.str (List.map snd acc) in
@@ -641,6 +641,11 @@ let global_infos_with_poly_err infos =
             str "use #[universes(polymorphic=no), " ++ attrs ++ str"] Sort in order to declare a global sort with " ++
             names ++ str ".")
   else ()
+
+let add_infos_to_global env infos globsort =
+  let env = if infos.with_uip then Environ.add_uip_to_global globsort env else env in
+  let env = if infos.erased_at_extraction then Environ.add_erasure_to_global globsort env else env in
+  env
 
 let new_global_sort infos senv =
   if is_modtype senv then
@@ -653,7 +658,7 @@ let new_global_sort infos senv =
   let s = QG.make (current_dirpath senv) uid in
   let qualities = QG.Map.add s infos senv.qualities in
   let env = Environ.push_qualities (Sorts.Quality.Set.singleton (QGlobal s)) senv.env in
-  let env = if infos.with_uip then Environ.add_uip_to_global s env else env in
+  let env = add_infos_to_global env infos s in
   s, { senv with
        env;
        qualities;
@@ -1675,10 +1680,7 @@ let empty_vm_library env lib = Vmlibrary.set_path lib.comp_name (Environ.vm_libr
 let univs_of_library lib = lib.comp_sorts, lib.comp_univs
 
 let push_global_infos global_infos env =
-  let add_sort_infos_to_env s infos env =
-    if infos.with_uip
-    then Environ.add_uip_to_global s env
-    else env in
+  let add_sort_infos_to_env s infos env = add_infos_to_global env infos s in
   Sorts.QGlobal.Map.fold add_sort_infos_to_env global_infos env
 
 let retroknowledge_of_library lib = lib.comp_retro

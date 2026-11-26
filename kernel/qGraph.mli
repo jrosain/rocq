@@ -113,4 +113,8 @@ val explain_elimination_error : Quality.printer -> elimination_error -> Pp.t
 
 val add_uip_to_global : QGlobal.t -> t -> t
 
+val add_erasure_to_global : QGlobal.t -> t -> t
+
 val sort_has_uip : Quality.t -> t -> bool
+
+val sort_has_erasure : Quality.t -> t -> bool

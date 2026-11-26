@@ -91,6 +91,7 @@ module QSet = QVar.Set
 
 type global_attrs = {
   sorts_with_uip : Sorts.Quality.Set.t;
+  sorts_with_erasure : Sorts.Quality.Set.t;
 }
 
 type t =
@@ -272,6 +273,7 @@ let enforce_eliminates_to s1 s2 g =
 
 let empty_global_attrs = {
   sorts_with_uip = Sorts.Quality.Set.singleton @@ Sorts.Quality.qsprop;
+  sorts_with_erasure = Sorts.Quality.(Set.of_list @@ [qsprop; qprop])
 }
 
 let initial_graph =
@@ -412,10 +414,21 @@ let explain_elimination_error defprv err =
 
 let on_global_attrs f g = { g with global_sorts_attrs = f g.global_sorts_attrs }
 
+let has_property_by_upwards_closure sorts_with_prop s g =
+  Quality.Set.exists (fun global_sort -> eliminates_to g global_sort s) sorts_with_prop
+
 let add_uip_to_global s g =
-  let f attrs = { sorts_with_uip = Quality.Set.add (Quality.global s) attrs.sorts_with_uip } in
+  let f attrs = { attrs with sorts_with_uip = Quality.Set.add (Quality.global s) attrs.sorts_with_uip } in
   on_global_attrs f g
 
 let sort_has_uip s g =
   (* definitional UIP on sorts is upwards closed *)
-  Quality.Set.exists (fun global_sort -> eliminates_to g global_sort s) g.global_sorts_attrs.sorts_with_uip
+  has_property_by_upwards_closure g.global_sorts_attrs.sorts_with_uip s g
+
+let add_erasure_to_global s g =
+  let f attrs = { attrs with sorts_with_erasure = Quality.Set.add (Quality.global s) attrs.sorts_with_erasure } in
+  on_global_attrs f g
+
+let sort_has_erasure s g =
+  (* erasure on sorts is upwards closed; otherwise, we would get nonsense extracted data. *)
+  has_property_by_upwards_closure g.global_sorts_attrs.sorts_with_erasure s g

@@ -431,6 +431,8 @@ val push_subgraph : Univ.ContextSet.t -> env -> env
 
 val add_uip_to_global : Sorts.QGlobal.t -> env -> env
 val sort_has_uip : Sorts.Quality.t -> env -> bool
+val add_erasure_to_global : Sorts.QGlobal.t -> env -> env
+val sort_has_erasure : Sorts.Quality.t -> env -> bool
 
 val set_typing_flags : typing_flags -> env -> env
 val set_impredicative_set : bool -> env -> env

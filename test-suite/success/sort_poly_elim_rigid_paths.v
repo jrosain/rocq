@@ -1,7 +1,5 @@
-Sort s s' s''.
-
-Constraint s -> s'.
-Constraint s' -> s''.
+Sort s s' s'' with
+  s -> s', s' -> s''.
 
 Polymorphic Axiom ad@{s;u} : forall A : Univ@{s;u}, A.
 Polymorphic Definition t@{s s';u v|s -> s'} (A : Univ@{s;u}) (B : Univ@{s';v}) : A := ad A.
@@ -15,7 +13,8 @@ Fail Check t@{s'' s;Set Set}.
 Fail Definition withelim@{|s'' -> s'} := tt.
 
 (* But if we do this, both should work. *)
-Constraint s'' -> s.
-Check t@{s'' s';Set Set}.
-Check t@{s'' s;Set Set}.
-Definition withelim@{|s'' -> s'} := tt.
+Sort s0 with
+  s' -> s0, s0 -> s.
+Check t@{s0 s';Set Set}.
+Check t@{s0 s;Set Set}.
+Definition withelim@{|s0 -> s'} := tt.

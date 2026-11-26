@@ -1,8 +1,8 @@
 Set Universe Polymorphism.
 Set Warnings "+redundant-elimination-constraint".
 
-Section Global.
-  Sort s s'.
+Section FailOnGroundOrGlobal.
+  Sort s.
 
   Fail Constraint Prop -> Type.
   Fail Constraint Type -> Prop.
@@ -10,10 +10,14 @@ Section Global.
 
   Fail Constraint Type -> s.
   Fail Constraint s -> s.
+End FailOnGroundOrGlobal.
 
-  Constraint Prop -> s.
-  Constraint s -> Prop.
-  Fail Constraint s -> SProp.
+Section Global.
+  Fail Sort s with
+    Prop -> s, s -> Prop, s -> SProp.
+
+  Sort s s' with
+    Prop -> s, s -> Prop.
 
   Polymorphic Axiom ad@{s;u} : forall A : Univ@{s;u}, A.
 
@@ -32,7 +36,7 @@ Definition dominant@{Exn Test;|Prop -> Test, Exn -> Test} := tt.
 Section Dominant.
   Sort Exn.
 
-  Sort Test.
+  Sort Test with
   Constraint Prop -> Test.
   Succeed Constraint Exn -> Test.
 

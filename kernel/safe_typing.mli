@@ -161,7 +161,7 @@ val push_context_set :
 
 type global_sort_infos
 val has_global_infos : global_sort_infos -> bool
-val make_global_infos : uip:bool -> global_sort_infos
+val make_global_infos : uip:bool -> erased:bool -> global_sort_infos
 val global_infos_with_poly_err : global_sort_infos -> unit
 
 val new_global_sort : global_sort_infos -> Sorts.QGlobal.t safe_transformer

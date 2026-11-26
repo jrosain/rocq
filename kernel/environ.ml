@@ -702,9 +702,16 @@ let push_subgraph (levels, univ_csts) env =
 
 let push_subgraph us env = NewProfile.profile "push_subgraph" (fun () -> push_subgraph us env) ()
 
-let add_uip_to_global s env = { env with env_qualities = QGraph.add_uip_to_global s env.env_qualities }
+let on_qualities env f = { env with env_qualities = f env.env_qualities }
+
+let add_uip_to_global s env = on_qualities env @@ QGraph.add_uip_to_global s
 
 let sort_has_uip s env = QGraph.sort_has_uip s env.env_qualities
+
+let add_erasure_to_global s env = on_qualities env @@ QGraph.add_erasure_to_global s
+
+let sort_has_erasure s env = QGraph.sort_has_erasure s env.env_qualities
+
 
 (* It's convenient to use [{flags with foo = bar}] so we're smart wrt to it. *)
 let same_flags {
